@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101114">
+<title>Spintria — SP Mining</title>
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<style>
+:root {
+  --bg: #101114;
+  --card: #1b1c22;
+  --gold: #e9bd58;
+  --gold2: #ffdf8c;
+  --text: #f5f5f5;
+  --muted: #9697a3;
+  --green: #71d9a1;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: Arial, sans-serif;
+  min-height: 100vh;
+  padding-bottom: 100px;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 22px 20px 16px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-icon {
+  width: 43px;
+  height: 43px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #ffe5a1, #bd872b);
+  color: #17130b;
+  display: grid;
+  place-items: center;
+  font-size: 25px;
+  font-weight: 900;
+}
+
+.logo h1 {
+  font-size: 21px;
+  letter-spacing: 1px;
+}
+
+.logo p {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.badge {
+  border: 1px solid #51452c;
+  border-radius: 20px;
+  padding: 8px 12px;
+  color: var(--gold);
+  font-size: 12px;
+}
+
+.page {
+  display: none;
+  padding: 10px 18px;
+  animation: appear .2s ease;
+}
+
+.page.active {
+  display: block;
+}
+
+@keyframes appear {
+  from {opacity: 0; transform: translateY(5px);}
+  to {opacity: 1; transform: translateY(0);}
+}
+
+.welcome {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 8px 0 18px;
+}
+
+.balance-card {
+  background: linear-gradient(145deg, #302719, #1b1c22 72%);
+  border: 1px solid #57472b;
+  border-radius: 23px;
+  padding: 24px 20px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.balance-card:before {
+  content: "";
+  position: absolute;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: #e9bd58;
+  opacity: .05;
+  top: -70px;
+  right: -40px;
+}
+
+.coin {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 52px;
+  font-weight: 900;
+  color: #34240b;
+  background: radial-gradient(circle at 35% 25%, #fff0b6, #e9bd58 48%, #96651d);
+  box-shadow: 0 0 35px #e9bd5825, inset 0 0 0 5px #fff3b34a;
+}
+
+.label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.balance {
+  font-size: 34px;
+  font-weight: 800;
+  margin: 8px 0;
+  overflow-wrap: anywhere;
+}
+
+.symbol {
+  color: var(--gold);
+  font-size: 14px;
+}
+
+.mining-rate {
+  margin-top: 18px;
+  padding: 12px;
+  border-radius: 13px;
+  background: #111216a8;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.rate-value {
+  color: var(--green);
+  font-weight: bold;
+}
+
+.claim-button {
+  width: 100%;
+  border: none;
+  border-radius: 15px;
+  margin-top: 18px;
+  padding: 17px;
+  color: #211808;
+  font-weight: 900;
+  font-size: 16px;
+  background: linear-gradient(100deg, #f6d889, #d9a63d);
+  box-shadow: 0 5px 22px #e9bd5820;
+}
+
+.claim-button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.section-title {
+  font-size: 22px;
+  margin: 15px 0 8px;
+}
+
+.section-subtitle {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.stat {
+  background: var(--card);
+  border: 1px solid #2b2c34;
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.stat .number {
+  font-size: 20px;
+  font-weight: 800;
+  margin-top: 9px;
+  color: var(--gold);
+  overflow-wrap: anywhere;
+}
+
+.list-card {
+  background: var(--card);
+  border: 1px solid #2b2c34;
+  border-radius: 17px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.row-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.item-icon {
+  width: 43px;
+  height: 43px;
+  flex-shrink: 0;
+  border-radius: 13px;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  background: #302719;
+}
+
+.item-title {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.item-desc {
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 5px;
+  line-height: 1.5;
+}
+
+.small-button {
+  border: 1px solid #68532c;
+  background: #34291a;
+  color: var(--gold);
+  border-radius: 10px;
+  padding: 10px 13px;
+  font-size: 12px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.small-button:disabled {
+  opacity: .5;
+}
+
+.friend-box {
+  border: 1px dashed #68532c;
+  background: #201c16;
+  padding: 15px;
+  border-radius: 13px;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  color: var(--gold2);
+  line-height: 1.6;
+  margin: 15px 0;
+}
+
+.profile-avatar {
+  width: 76px;
+  height: 76px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  margin: 15px auto;
+  font-size: 32px;
+  font-weight: 900;
+  color: #211808;
+  background: linear-gradient(135deg, #ffe5a1, #bd872b);
+}
+
+.profile-name {
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.profile-id {
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  margin: 8px 0 20px;
+  overflow-wrap: anywhere;
+}
+
+.bottom-nav {
+  position: fixed;
+  z-index: 10;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  background: #18191e;
+  border-top: 1px solid #303039;
+  padding: 9px 2px calc(9px + env(safe-area-inset-bottom));
+}
+
+.nav-button {
+  border: none;
+  background: transparent;
+  color: #858692;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  padding: 5px 0;
+}
+
+.nav-button .nav-icon {
+  font-size: 20px;
+}
+
+.nav-button.active {
+  color: var(--gold);
+}
+
+.notice {
+  background: #252117;
+  border: 1px solid #54462b;
+  border-radius: 12px;
+  padding: 13px;
+  color: #e9d5a8;
+  font-size: 12px;
+  line-height: 1.7;
+  margin-top: 18px;
+}
+
+.empty {
+  text-align: center;
+  padding: 25px 10px;
+  color: var(--muted);
+  line-height: 1.8;
+  font-size: 13px;
+}
+</style>
+</head>
+
+<body>
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">S</div>
+    <div>
+      <h1>SPINTRIA</h1>
+      <p>THE SP MINING NETWORK</p>
+    </div>
+  </div>
+  <div class="badge">● BETA</div>
+</header>
+
+<main>
+  <section class="page active" id="mine">
+    <p class="welcome" id="welcome">Welcome to Spintria 👋</p>
+
+    <div class="balance-card">
+      <div class="coin">S</div>
+      <div class="label">YOUR SP BALANCE</div>
+      <div class="balance" id="balance">0.00</div>
+      <div class="symbol">SP • SPINTRIA</div>
+
+      <div class="mining-rate">
+        <span>⚡ Mining speed</span>
+        <span class="rate-value" id="rate">+0.10 SP / hour</span>
+      </div>
+
+      <button class="claim-button" id="claimButton" onclick="claimCoins()">
+        CLAIM SP COINS
+      </button>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="label">TOTAL CLAIMED</div>
+        <div class="number" id="totalClaimed">0 SP</div>
+      </div>
+      <div class="stat">
+        <div class="label">MINING STATUS</div>
+        <div class="number" style="color:var(--green)">● Active</div>
+      </div>
+    </div>
+
+    <div class="notice">
+      ✨ Welcome to Spintria! Start collecting SP and explore the mining network.
+    </div>
+  </section>
+
+  <section class="page" id="tasks">
+    <h2 class="section-title">🎯 Tasks</h2>
+    <p class="section-subtitle">Complete activities to earn extra SP.</p>
+
+    <div class="list-card">
+      <div class="row">
+        <div class="row-left">
+          <div class="item-icon">📢</div>
+          <div>
+            <div class="item-title">Join our community</div>
+            <div class="item-desc">Community task • Reward: 25 SP</div>
+          </div>
+        </div>
+        <button class="small-button" onclick="demoTask(this,25)">Claim</button>
+      </div>
+    </div>
+
+    <div class="list-card">
+      <div class="row">
+        <div class="row-left">
+          <div class="item-icon">🚀</div>
+          <div>
+            <div class="item-title">Explore Spintria</div>
+            <div class="item-desc">Welcome task • Reward: 10 SP</div>
+          </div>
+        </div>
+        <button class="small-button" onclick="demoTask(this,10)">Claim</button>
+      </div>
+    </div>
+
+    <div class="notice">
+      These are demo tasks for the first version. Real task verification will be added later.
+    </div>
+  </section>
+
+  <section class="page" id="miners">
+    <h2 class="section-title">⛏️ Miners</h2>
+    <p class="section-subtitle">Improve your mining speed with upgrades.</p>
+
+    <div class="list-card">
+      <div class="row">
+        <div class="row-left">
+          <div class="item-icon">⚙️</div>
+          <div>
+            <div class="item-title">Basic Miner</div>
+            <div class="item-desc">Mining speed: +0.10 SP/hour</div>
+          </div>
+        </div>
+        <span class="symbol">FREE</span>
+      </div>
+    </div>
+
+    <div class="list-card">
+      <div class="row">
+        <div class="row-left">
+          <div class="item-icon">🔋</div>
+          <div>
+            <div class="item-title">Power Miner</div>
+            <div class="item-desc">Upgrade feature coming soon.</div>
+          </div>
+        </div>
+        <button class="small-button" onclick="comingSoon()">Soon</button>
+      </div>
+    </div>
+
+    <div class="list-card">
+      <div class="row">
+        <div class="row-left">
+          <div class="item-icon">💎</div>
+          <div>
+            <div class="item-title">Pro Miner</div>
+            <div class="item-desc">Advanced mining feature coming soon.</div>
+          </div>
+        </div>
+        <button class="small-button" onclick="comingSoon()">Soon</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="page" id="friends">
+    <h2 class="section-title">👥 Friends</h2>
+    <p class="section-subtitle">Invite friends and grow the Spintria community.</p>
+
+    <div class="balance-card">
+      <div class="coin" style="width:75px;height:75px;font-size:36px">👥</div>
+      <div class="label">YOUR INVITES</div>
+      <div class="balance" style="font-size:30px" id="inviteCount">0</div>
+      <div class="symbol">Invite rewards will be connected later.</div>
+    </div>
+
+    <div class="friend-box" id="referralText">
+      Your personal referral link will appear here when Spintria is connected to its Telegram bot.
+    </div>
+
+    <button class="claim-button" onclick="shareInvite()">INVITE FRIENDS</button>
+
+    <div class="notice">
+      Referral tracking and real invite rewards are not active in this demo yet.
+    </div>
+  </section>
+
+  <section class="page" id="profile">
+    <h2 class="section-title">👤 Profile</h2>
+    <p class="section-subtitle">Your Spintria account overview.</p>
+
+    <div class="profile-avatar">S</div>
+    <div class="profile-name" id="profileName">Spintria Miner</div>
+    <div class="profile-id" id="profileId">Telegram account not connected</div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="label">SP BALANCE</div>
+        <div class="number" id="profileBalance">0 SP</div>
+      </div>
+      <div class="stat">
+        <div class="label">TOTAL CLAIMED</div>
+        <div class="number" id="profileClaimed">0 SP</div>
+      </div>
+    </div>
+
+    <div class="notice">
+      Account information is stored only on this device in this demo version.
+    </div>
+  </section>
+</main>
+
+<nav class="bottom-nav">
+  <button class="nav-button active" onclick="showPage('mine',this)">
+    <span class="nav-icon">⛏️</span><span>Mine</span>
+  </button>
+  <button class="nav-button" onclick="showPage('tasks',this)">
+    <span class="nav-icon">🎯</span><span>Tasks</span>
+  </button>
+  <button class="nav-button" onclick="showPage('miners',this)">
+    <span class="nav-icon">⚙️</span><span>Miners</span>
+  </button>
+  <button class="nav-button" onclick="showPage('friends',this)">
+    <span class="nav-icon">👥</span><span>Friends</span>
+  </button>
+  <button class="nav-button" onclick="showPage('profile',this)">
+    <span class="nav-icon">👤</span><span>Profile</span>
+  </button>
+</nav>
+
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+}
+
+const STORAGE_KEY = "spintria_demo_v1";
+
+let data = {
+  balance: 0,
+  claimed: 0,
+  lastTime: Date.now(),
+  invites: 0,
+  completedTasks: []
+};
+
+try {
+  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+  if (saved) data = {...data, ...saved};
+} catch (e) {}
+
+const miningPerHour = 0.10;
+
+function saveData() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function updateScreen() {
+  document.getElementById("balance").textContent = data.balance.toFixed(4);
+  document.getElementById("totalClaimed").textContent = data.claimed.toFixed(4) + " SP";
+  document.getElementById("profileBalance").textContent = data.balance.toFixed(4) + " SP";
+  document.getElementById("profileClaimed").textContent = data.claimed.toFixed(4) + " SP";
+  document.getElementById("inviteCount").textContent = data.invites;
+
+  const user = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
+
+  if (user) {
+    document.getElementById("welcome").textContent =
+      "Welcome, " + (user.first_name || "Miner") + " 👋";
+    document.getElementById("profileName").textContent =
+      [user.first_name, user.last_name].filter(Boolean).join(" ") || "Spintria Miner";
+    document.getElementById("profileId").textContent =
+      "Telegram ID: " + user.id;
+  }
+}
+
+function showPage(pageId, button) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.getElementById(pageId).classList.add("active");
+
+  document.querySelectorAll(".nav-button").forEach(b => b.classList.remove("active"));
+  button.classList.add("active");
+}
+
+function claimCoins() {
+  const now = Date.now();
+  const elapsedHours = Math.max(0, (now - data.lastTime) / 3600000);
+  const earned = elapsedHours * miningPerHour;
+
+  if (earned < 0.0001) {
+    alert("Your next SP reward is still accumulating. Come back a little later!");
+    return;
+  }
+
+  data.balance += earned;
+  data.claimed += earned;
+  data.lastTime = now;
+  saveData();
+  updateScreen();
+  alert("You collected " + earned.toFixed(4) + " demo SP!");
+}
+
+function demoTask(button, reward) {
+  const taskId = "task_" + reward + "_" +
+    button.closest(".list-card").querySelector(".item-title").textContent;
+
+  if (data.completedTasks.includes(taskId)) {
+    alert("You have already claimed this demo task.");
+    return;
+  }
+
+  data.completedTasks.push(taskId);
+  data.balance += reward;
+  data.claimed += reward;
+  button.textContent = "Done";
+  button.disabled = true;
+  saveData();
+  updateScreen();
+  alert("You received " + reward + " demo SP!");
+}
+
+function comingSoon() {
+  alert("This feature will be developed in a future version.");
+}
+
+function shareInvite() {
+  const message = "Join me on Spintria — SP Mining Network!";
+  if (tg && tg.openTelegramLink) {
+    tg.openTelegramLink(
+      "https://t.me/share/url?url=&text=" + encodeURIComponent(message)
+    );
+  } else if (navigator.share) {
+    navigator.share({title:"Spintria", text:message}).catch(()=>{});
+  } else {
+    alert("Your Telegram referral link will be added when the bot is connected.");
+  }
+}
+
+updateScreen();
+</script>
+</body>
+  </html>
